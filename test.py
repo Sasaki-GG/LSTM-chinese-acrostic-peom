@@ -24,7 +24,7 @@ UNKNOWN_CHAR = '*'
 MAX_LENGTH = 100
 MIN_LENGTH = 10
 
-SAVE_PATH = 'save/torch_save_replace'
+SAVE_PATH = 'torch_save_replace'
 
 max_words = 3000
 
@@ -54,15 +54,10 @@ class JUDNN(nn.Module):
         self.linear1 = nn.Linear(self.hidden_dim, 1)
     
     def forward(self, input, hidden=None):
-        # print ('bug',type(input),input)
-        # x = input
         input = torch.from_numpy(input)
         seq_len, batch_size = np.size(input ,0), np.size(input ,1)
         input = input.long()
         input = Variable(input)
-        # print (input)
-        # seq_len, batch_size = input.size()
-        # print('bb',seq_len, batch_size)
         if hidden is None:
             h0 = torch.randn(
                 2, batch_size, self.hidden_dim)
@@ -74,12 +69,8 @@ class JUDNN(nn.Module):
         # size here : (seq_len, batch_size, embedin   g_dim)
         embeds = self.embeddings(input)
 
-        # print (embeds)
-        # print (input)
-        # output size: (seq_len, batch_size, hidden_dim)
         output, hidden = self.lstm(embeds, (h0, c0))
 
-        # size here : (seq_len*batch_size, vocab_size)
         output = self.linear1(output.view(seq_len*batch_size, -1))
         # return output, hidden
         return output
@@ -170,9 +161,6 @@ class LNN(nn.Module):
         seq_len, batch_size = np.size(input ,0), np.size(input ,1)
         input = input.long()
         input = Variable(input)
-        # print (input)
-        # seq_len, batch_size = input.size()
-        # print('bb',seq_len, batch_size)
         if hidden is None:
             h0 = torch.randn(
                 2, batch_size, self.hidden_dim)
@@ -183,10 +171,6 @@ class LNN(nn.Module):
         # print (h0,c0)
         # size here : (seq_len, batch_size, embedin   g_dim)
         embeds = self.embeddings(input)
-
-        # print (embeds)
-        # print (input)
-        # output size: (seq_len, batch_size, hidden_dim)
         output, hidden = self.lstm(embeds, (h0, c0))
 
         # size here : (seq_len*batch_size, vocab_size)
@@ -194,12 +178,6 @@ class LNN(nn.Module):
         # return output, hidden
         return output
 
-    # def forward(self, x):
-    #     x = torch.from_numpy(x)
-    #     x = x.long()
-    #     x = self.embeddings(x)
-    #     x , _ = self.lstm(x)
-    #     return x
 
 def train(zero=False):
     global train_data
@@ -222,15 +200,8 @@ def train(zero=False):
         for step in range(train_data.n_size):
             b_x = train_data.x_batches[step]
             b_y = train_data.y_batches[step]
-            # b_x = Variable(x)
-            # b_y = Variable(y)
-
-            # print ('xbug',b_y)
-            # print ('ybug',b_y)
+         
             output  = model(b_x)
-
-            # print ('prebug',b_y.size,b_y)
-            # print ('outbug',output.size(),output)
 
             loss = loss_func(output, torch.from_numpy(b_y).view(-1).long())
             optimizer.zero_grad()
@@ -251,23 +222,12 @@ def train(zero=False):
                     for cha in line:
                         tmp += train_data.id2char(cha)
                 print (tmp)
-                # tmp = ''
-                # for line in b_y:
-                #     for cha in line:
-                #         tmp += train_data.id2char(cha)
-                # print(tmp)
                 tmp = ''
                 for line in output:
                     cha = torch.argmax(line)
                     tmp += train_data.id2char(int(cha))
                 print(tmp)
                 print('Epoch:',epoch, 'Step: ', step, '| train loss:', loss.data)
-
-    # test_output = model(test_x[:10].view(-1, 28, 28))
-    # pred_y = torch.max(test_output, 1)[1].data.numpy().squeeze()
-    # print(pred_y, 'prediction number')
-    # print(test_y[:10].numpy(), 'real number')
-    # while True:
 
 def yum_max(x,result):
     global train_data
@@ -303,11 +263,6 @@ def predict(sentence_head, yun=''):
         # print ('inp',inp)
         # inp = np.padding(inp, )
         out = model(inp)
-        # print ('out',out)
-        # for p in out:
-            # print (p.topk(1))
-            # print(p.topk(1)[1][0])
-            # print(int(p.topk(1)[1][0]))
         if i==9 or i==19:
             tmp_out = train_data.id2char(yum_max(yun, out[i-1]))
             while tmp_out=='*' or tmp_out=='E':
